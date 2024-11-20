@@ -5,6 +5,7 @@ import java.awt.Image
 import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.io.path.Path
 import kotlin.math.sign
 
 fun main() {
@@ -12,8 +13,28 @@ fun main() {
     val fileIn = File("./images/limaa.jpeg")
     val fileGray = File("./images/limaa_gray.jpeg")
     val fileBorder = File("./images/limaa_border.jpeg")
-    
-    val bufferedImage = ImageIO.read(fileIn)
+
+    val directory = File("./images")
+
+    if(directory.exists() && directory.isDirectory) {
+        val files = directory.listFiles()
+        for (file in files) {
+            if(file.name.endsWith(".jpg") || file.name.endsWith(".jpeg")) {
+                val imageOriginal = ImageIO.read(file.inputStream())
+                val bufferedImageGray = convertImageToGray(imageOriginal)
+                val fileNameGray = File("$directory/gray_${file.name}")
+                ImageIO.write(bufferedImageGray, "jpeg", fileNameGray)
+                val bufferedImageBorder = sobel(bufferedImageGray)
+                val fileNameBorder = File("$directory/border_${file.name}")
+                ImageIO.write(bufferedImageBorder, "jpeg", fileNameBorder)
+            }
+        }
+    }
+
+
+
+
+    /*val bufferedImage = ImageIO.read(fileIn)
     val bufferedImageGray = convertImageToGray(bufferedImage)
 
     ImageIO.write(bufferedImageGray, "jpeg", fileGray)
@@ -22,7 +43,7 @@ fun main() {
 
     val borderImage = sobel(readbufferedImageGray)
 
-    ImageIO.write(borderImage, "jpeg", fileBorder)
+    ImageIO.write(borderImage, "jpeg", fileBorder)*/
 
 }
 
