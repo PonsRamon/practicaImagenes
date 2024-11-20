@@ -25,6 +25,8 @@ fun main() {
                 }
             }
         }
+    }else{
+        println("El directorio '$directory' no existe")
     }
 
 }
