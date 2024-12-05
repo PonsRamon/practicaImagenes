@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
-class Sobel(private val directory: File, private val file: File): Runnable {
+class Sobel(private val directory: File, private val file: File) : Runnable {
 
     fun convertImageToGray(image: BufferedImage): BufferedImage {
         val bufferedImageGray = BufferedImage(image.width, image.height, BufferedImage.TYPE_INT_RGB)
@@ -36,12 +36,19 @@ class Sobel(private val directory: File, private val file: File): Runnable {
         var cx: Int
         var cy: Int
 
-        for (i in 1..<bufferedImageGray.width - 1) {
-            for (j in 1..<bufferedImageGray.height - 1) {
+        for (i in 0..<bufferedImageGray.width) {
+            for (j in 0..<bufferedImageGray.height) {
+
                 val matriz = arrayOf(
-                    Color(bufferedImageGray.getRGB(i - 1, j - 1)).red, Color(bufferedImageGray.getRGB(i - 1, j)).red, Color(bufferedImageGray.getRGB(i - 1, j + 1)).red,
-                    Color(bufferedImageGray.getRGB(i, j - 1)).red, Color(bufferedImageGray.getRGB(i, j)).red, Color(bufferedImageGray.getRGB(i, j + 1)).red,
-                    Color(bufferedImageGray.getRGB(i + 1, j - 1)).red, Color(bufferedImageGray.getRGB(i + 1, j)).red, Color(bufferedImageGray.getRGB(i + 1, j + 1)).red
+                    computeValue(bufferedImageGray, i - 1, j - 1),
+                    computeValue(bufferedImageGray, i - 1, j),
+                    computeValue(bufferedImageGray, i - 1, j + 1),
+                    computeValue(bufferedImageGray, i, j - 1),
+                    computeValue(bufferedImageGray, i, j),
+                    computeValue(bufferedImageGray, i, j + 1),
+                    computeValue(bufferedImageGray, i + 1, j - 1),
+                    computeValue(bufferedImageGray, i + 1, j),
+                    computeValue(bufferedImageGray, i + 1, j + 1)
                 )
 
                 cx = calculateCx(matriz)
@@ -52,7 +59,13 @@ class Sobel(private val directory: File, private val file: File): Runnable {
                 //println("g: $g")
                 var numColor = 0
 
-                if (g < 0) { numColor = 0 } else if (g > 100) { numColor = 255 } else { numColor = g.toInt() }
+                if (g < 0) {
+                    numColor = 0
+                } else if (g > 200) {
+                    numColor = 255
+                } else {
+                    numColor = g.toInt()
+                }
 
                 val newColor = Color(numColor, numColor, numColor)
 
@@ -63,7 +76,15 @@ class Sobel(private val directory: File, private val file: File): Runnable {
         return bufferedImage
     }
 
-    fun calculateCx(matriz:Array<Int>): Int {
+    fun computeValue(b: BufferedImage, i: Int, j: Int): Int {
+        if (i < 0 || i > b.width - 1 || j < 0 || j > b.height - 1) {
+            return 0
+        }
+
+        return Color(b.getRGB(i, j)).red
+    }
+
+    fun calculateCx(matriz: Array<Int>): Int {
         var cx: Int = 0
 
         val gx = arrayOf(
@@ -79,7 +100,7 @@ class Sobel(private val directory: File, private val file: File): Runnable {
         return cx
     }
 
-    fun calculateCy(matriz:Array<Int>): Int {
+    fun calculateCy(matriz: Array<Int>): Int {
         var cy: Int = 0
 
         val gy = arrayOf(
@@ -95,8 +116,8 @@ class Sobel(private val directory: File, private val file: File): Runnable {
         return cy
     }
 
-    fun pitagoras(cx:Int, cy:Int): Double {
-        return Math.sqrt((Math.pow(cx.toDouble(),2.0)) + (Math.pow(cy.toDouble(),2.0)))
+    fun pitagoras(cx: Int, cy: Int): Double {
+        return Math.sqrt((Math.pow(cx.toDouble(), 2.0)) + (Math.pow(cy.toDouble(), 2.0)))
     }
 
     override fun run() {
